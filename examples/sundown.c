@@ -61,9 +61,17 @@ main(int argc, char **argv)
 	/* performing markdown parsing */
 	ob = bufnew(OUTPUT_UNIT);
 
-	sdhtml_renderer(&callbacks, &options, 0);
+	//sdhtml_renderer(&callbacks, &options, HTML_TOC);
+	sdhtml_toc_renderer(&callbacks, &options);
 	markdown = sd_markdown_new(0, 16, &callbacks, &options);
+	sd_markdown_render(ob, ib->data, ib->size, markdown);
+	sd_markdown_free(markdown);
 
+	// /* writing the result to stdout */
+	// ret = fwrite(ob->data, 1, ob->size, stdout);
+
+	sdhtml_renderer(&callbacks, &options, HTML_TOC);
+	markdown = sd_markdown_new(0, 16, &callbacks, &options);
 	sd_markdown_render(ob, ib->data, ib->size, markdown);
 	sd_markdown_free(markdown);
 
