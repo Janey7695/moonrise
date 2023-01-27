@@ -487,6 +487,26 @@ rndr_normal_text(struct buf *ob, const struct buf *text, void *opaque)
 }
 
 static void
+rndr_start(struct buf *ob, void *opaque)
+{
+	//struct html_renderopt *options = opaque;
+
+	BUFPUTSL(ob,"<div class=\"content\">\n");
+	
+	// while (options->toc_data.current_level > 0) {
+	// 	BUFPUTSL(ob, "</li>\n</ul>\n");
+	// 	options->toc_data.current_level--;
+	// }
+}
+
+static void
+rndr_finalize(struct buf *ob, void *opaque)
+{
+	//struct html_renderopt *options = opaque;
+		BUFPUTSL(ob,"</div>\n");
+}
+
+static void
 toc_header(struct buf *ob, const struct buf *text, int level, void *opaque)
 {
 	struct html_renderopt *options = opaque;
@@ -529,6 +549,19 @@ toc_link(struct buf *ob, const struct buf *link, const struct buf *title, const 
 }
 
 static void
+toc_start(struct buf *ob, void *opaque)
+{
+	struct html_renderopt *options = opaque;
+
+	BUFPUTSL(ob,"<div class=\"toc\">\n");
+	options->toc_data.current_level = options->toc_data.current_level;
+	// while (options->toc_data.current_level > 0) {
+	// 	BUFPUTSL(ob, "</li>\n</ul>\n");
+	// 	options->toc_data.current_level--;
+	// }
+}
+
+static void
 toc_finalize(struct buf *ob, void *opaque)
 {
 	struct html_renderopt *options = opaque;
@@ -536,6 +569,9 @@ toc_finalize(struct buf *ob, void *opaque)
 	while (options->toc_data.current_level > 0) {
 		BUFPUTSL(ob, "</li>\n</ul>\n");
 		options->toc_data.current_level--;
+	}
+	if(options->toc_data.current_level == 0){
+		BUFPUTSL(ob,"</div>\n");
 	}
 }
 
@@ -570,7 +606,7 @@ sdhtml_toc_renderer(struct sd_callbacks *callbacks, struct html_renderopt *optio
 		NULL,
 		NULL,
 
-		NULL,
+		toc_start,
 		toc_finalize,
 	};
 
@@ -611,8 +647,8 @@ sdhtml_renderer(struct sd_callbacks *callbacks, struct html_renderopt *options, 
 		NULL,
 		rndr_normal_text,
 
-		NULL,
-		NULL,
+		rndr_start,
+		rndr_finalize,
 	};
 
 	/* Prepare the options pointer */
